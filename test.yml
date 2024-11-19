@@ -1,0 +1,24 @@
+#https://status.gewv.iet.mw.tu-dresden.de
+http:
+  middlewares:
+    ip-redirect:
+      redirectRegex:
+        regex: ".*"
+        replacement: "https://status.gewv.iet.mw.tu-dresden.de${3}"
+        permanent: true
+
+  routers:
+    ip-router:
+      rule: "Host(`172.26.53.179`)"
+      entryPoints:
+        - http
+        - https
+      middlewares:
+        - ip-redirect
+      service: noop@internal
+
+entryPoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"

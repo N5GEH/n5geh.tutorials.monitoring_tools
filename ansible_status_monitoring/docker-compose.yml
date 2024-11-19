@@ -1,0 +1,101 @@
+# https://github.com/tlex/traefik-oauth2-proxy/blob/master/docker-compose.yml
+# https://medium.com/@justinking_2311/securing-your-services-with-oauth2-proxy-and-traefik-a-docker-compose-guide-8a4c3ad57cb2
+# https://joeeey.com/blog/selfhosting-sso-with-traefik-oauth2-proxy-part-2/
+
+services:
+
+  uptime-kuma:
+    image: elestio/uptime-kuma:1.23.15
+    container_name: uptime-kuma
+    volumes:
+      - ${UPTIME_KUMA_PATH}:/app/data
+    networks:
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.http.routers.uptime-kuma.entrypoints: https
+      traefik.http.routers.uptime-kuma.tls: true
+      traefik.http.routers.uptime-kuma.tls.certresolver: sectigo
+      traefik.http.routers.uptime-kuma.rule: Host(`${UPTIME_KUMA_HOST}`)
+      
+      traefik.http.routers.uptime-kuma.service: uptime-kuma
+      traefik.http.services.uptime-kuma.loadbalancer.server.port: 3001
+
+      traefik.http.routers.uptime-kuma.middlewares: oauth-signin, oauth-verify, redirect-statuspage
+
+      traefik.http.middlewares.redirect-statuspage.redirectregex.regex: ^https?://${UPTIME_KUMA_HOST}/?$$
+      traefik.http.middlewares.redirect-statuspage.redirectregex.replacement: https://${UPTIME_KUMA_HOST}/status/general
+      traefik.http.middlewares.redirect-statuspage.redirectregex.permanent: true
+      
+
+    restart: on-failure
+
+  traefik:
+    image: traefik:2.11.13
+    container_name: traefik
+    restart: always
+    networks:
+      - traefik
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${TRAEFIK_PATH}/traefik.yml:/traefik.yml:ro
+      - ${TRAEFIK_PATH}/acme.json:/acme.json
+
+  
+  oauth:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+    container_name: oauth
+    environment:
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
+      - OAUTH2_PROXY_PROVIDER=keycloak
+      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME=Keycloak
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_SCOPE=openid profile email
+      - OAUTH2_PROXY_CLIENT_ID=${OAUTH2_PROXY_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${OAUTH2_PROXY_CLIENT_SECRET}
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_PROXY_COOKIE_SECRET}
+      - OAUTH2_PROXY_LOGIN_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/auth
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=${OAUTH_PROVIDER_URL}
+      - OAUTH2_PROXY_PROFILE_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/userinfo
+      - OAUTH2_PROXY_REDEEM_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/token
+      - OAUTH2_PROXY_VALIDATE_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/userinfo
+      - OAUTH2_PROXY_FOOTER=${OAUTH2_PROXY_FOOTER}
+      - OAUTH2_PROXY_PASS_BASIC_AUTH=false
+      - OAUTH2_PROXY_PASS_USER_HEADERS=true
+      - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
+      - OAUTH2_PROXY_ALLOWED_GROUPS=${OAUTH2_PROXY_ALLOWED_GROUP}
+      - OAUTH2_PROXY_REVERSE_PROXY=true
+      - OAUTH2_PROXY_COOKIE_DOMAIN=.${OAUTH2_PROXY_BASIC_DOMAIN}
+      - OAUTH2_PROXY_WHITELIST_DOMAIN=*.{OAUTH2_PROXY_BASIC_DOMAIN}
+
+    labels:
+      traefik.enable: 'true'
+      traefik.http.middlewares.oauth-verify.forwardAuth.address: http://oauth:4180/oauth2/auth?allowed_groups=${OAUTH2_PROXY_ALLOWED_GROUP}
+      traefik.http.middlewares.oauth-verify.forwardAuth.trustForwardHeader: 'true'
+      traefik.http.middlewares.oauth-verify.forwardAuth.authResponseHeaders: X-Auth-Request-User,X-Auth-Request-Email,Authorization,Set-Cookie
+      traefik.http.middlewares.oauth-signin.errors.service: oauth@docker
+      traefik.http.middlewares.oauth-signin.errors.status: '401'
+      traefik.http.middlewares.oauth-signin.errors.query: /oauth2/sign_in
+      traefik.http.routers.oauth.entrypoints: https
+      traefik.http.routers.oauth.tls.certResolver: sectigo
+      traefik.http.routers.oauth.rule: Host(`oauth.${UPTIME_KUMA_HOST?err}`) || PathPrefix(`/oauth2`)
+      traefik.http.routers.oauth.service: oauth@docker
+      traefik.http.services.oauth.loadbalancer.server.port: '4180'
+    networks:
+      - traefik
+
+    restart: on-failure
+
+
+networks:
+  traefik:
+    driver: bridge
+
+
