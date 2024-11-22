@@ -1,0 +1,8 @@
+ARG CRATE_VERSION=4.8.4
+ARG CRATE_JMX_EXPORTER_VERSION=1.0.0
+
+FROM crate:$CRATE_VERSION
+
+RUN wget -P /jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar hhttps://repo1.maven.org/maven2/io/crate/crate-jmx-exporter/
+
+ENV CRATE_JAVA_OPTS="-javaagent:/jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar=7071 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false"

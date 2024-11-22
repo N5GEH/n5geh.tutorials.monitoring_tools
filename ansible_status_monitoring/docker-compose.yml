@@ -28,7 +28,7 @@ services:
       traefik.http.middlewares.redirect-statuspage.redirectregex.permanent: true
       
 
-    restart: on-failure
+    restart: always
 
   traefik:
     image: traefik:2.11.13
@@ -91,7 +91,7 @@ services:
     networks:
       - traefik
 
-    restart: on-failure
+    restart: always
 
 
 networks:

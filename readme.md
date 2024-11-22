@@ -1,8 +1,16 @@
 # Monitoring
 
+## Übersicht
+- Allgemeine Hinweise
+    - Ansible
+    - Docker (Installation mit Ansible)
+    - Keycloak
 - Dokumentation der Monitoring-Systeme
     - Status-Monitoring
     - IoT-Monitoring (#TODO)
+    - Cluster-Monitoring
+
+
 
 ## Allgemeines
 ### Nutzung von Ansible
@@ -30,6 +38,28 @@
 ### Docker
 - Docker wird zum Deployment der einzelnen Dienste genutzt
 - Verwendung eines [Ansible-Playbooks](./ansible_docker/playbook_docker.yml) zur Installation von Docker möglich
+
+### Anlage eines Clients in Keycloak
+
+Änderungen im Admin-Interface von Keycloak
+1) Im gewünschten Realm zu Clients navigieren
+2) Neuen Client erstellen
+    - General Settings
+        - `Client type`: OpenID Connect
+        - `Client ID ` eindeutig setzen
+        - `Name` und `Description` optional
+    - Capability Config
+        - ![Einrichtung Capability Config](./keycloak_anbindung/oauth_client_capability_config.png)
+    - Login-Settings
+        - `Valid redirect URIs` enspricht der URL des gewünschten Dienstes
+3) Anpassung der Scropes notwendig
+    - Navigation in erstellten Client / Client Scopes
+    - Auswahl des mit erstellten Scopes `${Client ID}-dedicated`
+    - Hinzufügen eines Mappers ("By Configuration")
+        - ![Mapper Group Membership](./keycloak_anbindung/oauth_client_scropes_groups.png)
+4) Erstellung der gewünschten Gruppe und hinzufügen der betreffenden Personen
+5) Übertragung der Zugangsdaten an [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) aus Client Config
+    - ![Client Credentials](./keycloak_anbindung/oauth_client_credentials.png)
 
 
 ## Status Monitoring
@@ -71,27 +101,41 @@
     TRAEFIK_ACME_EMAIL=             # EMAIL für ACME Account
     ```
 
+## IoT-Monitoring
+- #TODO
 
+## Platform Monitoring
+- Monitoring the status of the FIWARE platform components in implementation with Docker Swarm
+- Monitoring by usage of [Prometheus](https://prometheus.io/) with multiple data collectors:
+    - [cAdvisor](https://github.com/google/cadvisor):
+        - Container Advisor provides information about the resource usage of the running containers.
+        - This data is collected for each container deployed in the system.
+        - Needed to run on each docker host
+    - [Node exporter](https://github.com/prometheus/node_exporter)
+        - Provides information about the hardware
+    - CrateDB: 
+        - Using the [Crate JMX HTTP Exporter](https://github.com/crate/jmx_exporter)
+        - Needs to be implemented in the Docker-Container of CreateDB 
+        - Build your image with the attached dockerfile - see [platform_monitoring/cratedb_exporter/](./platform_monitoring/cratedb_exporter/)
+        
 
-## Anlage eines Clients in Keycloak
+- More data collectors could be used, like:
+    - [json_exporter](https://github.com/prometheus-community/json_exporter) 
+        - Collect data from json http apis, e.g. orion or iot-agent
+    - [MongoDB exporter](https://github.com/percona/mongodb_exporter)
+        - The MongoDB exporter provides the metrics exposed by MongoDB monitoring commands
+    - A overview about more exporters and intagrations gives the [prometheus doc](https://prometheus.io/docs/instrumenting/exporters/)
 
-Änderungen im Admin-Interface von Keycloak
-1) Im gewünschten Realm zu Clients navigieren
-2) Neuen Client erstellen
-    - General Settings
-        - `Client type`: OpenID Connect
-        - `Client ID ` eindeutig setzen
-        - `Name` und `Description` optional
-    - Capability Config
-        - ![Einrichtung Capability Config](./keycloak_anbindung/oauth_client_capability_config.png)
-    - Login-Settings
-        - `Valid redirect URIs` enspricht der URL des gewünschten Dienstes
-3) Anpassung der Scropes notwendig
-    - Navigation in erstellten Client / Client Scopes
-    - Auswahl des mit erstellten Scopes `${Client ID}-dedicated`
-    - Hinzufügen eines Mappers ("By Configuration")
-        - ![Mapper Group Membership](./keycloak_anbindung/oauth_client_scropes_groups.png)
-4) Erstellung der gewünschten Gruppe und hinzufügen der betreffenden Personen
-5) Übertragung der Zugangsdaten an [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) aus Client Config
-    - ![Client Credentials](./keycloak_anbindung/oauth_client_credentials.png)
-
+- Deployment via [compose](./platform_monitoring/docker-compose.yml)
+    - Example for a docker swarm architecure, each data collecor is deployed on each host. Adapt the implementation in your system.
+    - Configuration with the [prometheus.yml](./platform_monitoring/prometheus.yml)
+        - In docker swarm, the configuration could be provided via the external configs
+        - For more Information see [doc](https://github.com/portainer/templates/blob/master/images/monitoring/prometheus/config/prometheus.yml)
+    - The monitoring data of prometheus should be stored in a volume to keep them outside of the container itself
+- Grafana visualisation
+    - Grafana could visualize the data from prometheus
+    - Prometheus could be added as datasource - see [prometheus doc](https://prometheus.io/docs/visualization/grafana/)
+    - A lot of dashboard templates could be used, like:
+        - [Grafana Cadvisor exporter](https://grafana.com/grafana/dashboards/14282-cadvisor-exporter/)
+        - [Grafana CrateDB Monitoring](https://grafana.com/grafana/dashboards/17174-cratedb-monitoring/)
+        - [Grafana Node Exporter Full](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)
