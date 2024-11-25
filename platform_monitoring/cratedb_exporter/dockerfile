@@ -1,8 +1,23 @@
 ARG CRATE_VERSION=4.8.4
 ARG CRATE_JMX_EXPORTER_VERSION=1.0.0
 
+FROM debian:stable-slim AS builder
+
+RUN apt-get update && apt-get install -y wget
+
+# Variables
+ARG CRATE_JMX_EXPORTER_VERSION
+ENV CRATE_EXPORTER_PATH="/jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar"
+
+RUN mkdir -p /jmxdir && wget -O ${CRATE_EXPORTER_PATH} \
+https://repo1.maven.org/maven2/io/crate/crate-jmx-exporter/${CRATE_JMX_EXPORTER_VERSION}/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar
+
 FROM crate:$CRATE_VERSION
 
-RUN wget -P /jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar hhttps://repo1.maven.org/maven2/io/crate/crate-jmx-exporter/
+# Variables
+ARG CRATE_JMX_EXPORTER_VERSION
+ENV CRATE_EXPORTER_PATH="/jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar"
+
+COPY --from=builder ${CRATE_EXPORTER_PATH} ${CRATE_EXPORTER_PATH}
 
 ENV CRATE_JAVA_OPTS="-javaagent:/jmxdir/crate-jmx-exporter-${CRATE_JMX_EXPORTER_VERSION}.jar=7071 -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false"
