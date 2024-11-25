@@ -8,9 +8,9 @@
 - Documentation of the Monitoring Systems
     - Status Monitoring
     - IoT Monitoring (#TODO)
-    - Cluster Monitoring
+    - Platform Monitoring
 
-## General
+## General Notes
 ### Using Ansible
 - Easy setup via Ansible Playbook
 - Installation of Ansible
@@ -59,7 +59,8 @@ Changes in the Keycloak admin interface
 5) Transfer the access data to [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) from the client config
     - ![Client Credentials](./keycloak_connection/oauth_client_credentials.png)
 
-## Status Monitoring
+## Documentation of the Monitoring Systems
+### Status Monitoring
 - Using [Uptime-Kuma](https://github.com/louislam/uptime-kuma):
     - to check the availability of various services
     - to check server certificates
@@ -98,10 +99,10 @@ Changes in the Keycloak admin interface
     TRAEFIK_ACME_EMAIL=             # Email for ACME account
     ```
 
-## IoT-Monitoring
+### IoT-Monitoring
 - #TODO
 
-## Platform Monitoring
+### Platform Monitoring
 - Monitoring the status of the FIWARE platform components in implementation with Docker Swarm
 - Monitoring by usage of [Prometheus](https://prometheus.io/) with multiple data collectors:
     - [cAdvisor](https://github.com/google/cadvisor):
