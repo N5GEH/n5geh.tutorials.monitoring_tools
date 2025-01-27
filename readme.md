@@ -7,7 +7,7 @@
     - Keycloak
 - Documentation of the Monitoring Systems
     - Status Monitoring
-    - IoT Monitoring (#TODO)
+    - IoT Monitoring
     - Platform Monitoring
 
 ## General Notes
@@ -74,7 +74,7 @@ Changes in the Keycloak admin interface
 - Using Traefik as a reverse proxy
     - Setting up certificates via Sertigo (An adaptation is required for other Certresolvers)
 
-- Deployment via [Ansible Playbooks](./ansible_status_monitoring/playbook_status.yml) and Docker Compose (through Ansible)
+- Deployment via [Ansible Playbook](./ansible_status_monitoring/playbook_status.yml) and Docker Compose (through Ansible):
     - [Configuration of Traefik](./ansible_status_monitoring/traefik.yml) is equipped with environment variables by Ansible
 
 - Using environment variables (`.env`) in the root directory:
@@ -100,7 +100,18 @@ Changes in the Keycloak admin interface
     ```
 
 ### IoT-Monitoring
-- #TODO
+- Monitoring of IoT-Devices via [CheckMK](https://checkmk.com)
+- Monitoring tool for various IoT devices and systems - see documentation [docs.checkmk.com](https://docs.checkmk.com/latest)
+- Individual extensions can be added manually
+- The following ENVS are required for deploying:
+    ```
+    CMK_PATH=       # Path where CheckMk stores the monitoring data and configuration.
+    CMK_SITE_ID=    # ID of your monitoring site
+    CMK_PASSWORD=   # Set an initial password for the cmkadmin user.
+    CMK_URL=        # URL / DNS-Name for the CMK-Host
+    ```
+- Deployment is possible via Docker Compose or [Ansible Playbook](./ansible_service_monitoring/playbook_cmk.yml):
+    `./ansible_basic/ansible-playbook.sh -i ./ansible_basic/hosts.ini /${PATH_TO}/ansible_service_monitoring/playbook_cmk.yml`
 
 ### Platform Monitoring
 - Monitoring the status of the FIWARE platform components in implementation with Docker Swarm

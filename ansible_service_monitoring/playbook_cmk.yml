@@ -1,0 +1,27 @@
+
+- name: Install IoT Monitoring via CheckMK
+  hosts: localhost
+  become: yes
+
+  pre_tasks:
+  - name: Loading environment variables
+    tags: always
+    set_fact:
+      CMK_PATH: '{{ lookup("env", "CMK_PATH") }}'
+    
+  tasks:
+
+    - name: Create directory for CheckMK
+      file:
+        path: "{{ CMK_PATH }}"
+        state: directory
+        mode: '0777'
+    
+    - name: Deploy Docker Compose
+      # https://docs.ansible.com/ansible/latest/collections/community/docker/docker_compose_v2_module.html#ansible-collections-community-docker-docker-compose-v2-module
+      community.docker.docker_compose_v2:
+        env_files: ./../.env
+        project_src: .
+        state: present 
+        pull: always
+        recreate: always
