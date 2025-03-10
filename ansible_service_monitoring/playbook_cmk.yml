@@ -8,6 +8,7 @@
     tags: always
     set_fact:
       CMK_PATH: '{{ lookup("env", "CMK_PATH") }}'
+      CMK_SITE: '{{ lookup("env", "CMK_SITE_ID") }}'
     
   tasks:
 
@@ -25,3 +26,66 @@
         state: present 
         pull: always
         recreate: always
+
+    - name: Get Rocket.Chat Plugin
+      ansible.builtin.get_url:
+        url: "https://exchange.checkmk.com/packages/rocketchat-notification-1/1429/rocketchat-notification-1.1.6.mkp"
+        dest: "."
+        mode: '0777'
+
+    - name: Wait 60 seconds until the container is raised
+      pause:
+        seconds: 60
+    
+    - name: Copy Plugin Files into the container
+      copy:
+        src: rocketchat-notification-1.1.6.mkp
+        dest: "{{ CMK_PATH }}"
+        remote_src: yes
+  
+    - name: Delete the original plugin file
+      file:
+        path: rocketchat-notification-1.1.6.mkp
+        state: absent
+
+    - name: Check if Rocket.Chat MKP package is already installed
+      community.docker.docker_container_exec:
+        container: checkmk
+        command: "bash -c 'source {{ CMK_SITE }}/.profile && {{ CMK_SITE }}/bin/mkp list'"
+        chdir: /omd/sites
+        user: 1000
+      register: mkp_list
+      delegate_to: localhost
+
+    - name: Install the Rocket.Chat MKP package in the container as omd, if not installed
+      community.docker.docker_container_exec:
+        container: checkmk
+        command: "bash -c 'source {{ CMK_SITE }}/.profile && {{ CMK_SITE }}/bin/mkp add rocketchat-notification-1.1.6.mkp'"
+        chdir: /omd/sites
+        user: root
+      when: "'rocketchat-notification' not in mkp_list.stdout"
+      delegate_to: localhost
+  
+    - name: Activate the Rocket.Chat MKP package in the container as omd
+      community.docker.docker_container_exec:
+        container: checkmk
+        command: "bash -c 'source {{ CMK_SITE }}/.profile && {{ CMK_SITE }}/bin/mkp enable rocketchat-notification'"
+        chdir: /omd/sites
+        user: root
+      delegate_to: localhost
+  
+    - name: Remove the installation files of the Rocket.Chat MKP package in the container as omd
+      community.docker.docker_container_exec:
+        container: checkmk
+        command: "bash -c 'source gewv/.profile && rm rocketchat-notification-1.1.6.mkp'"
+        chdir: /omd/sites
+        user: root
+      delegate_to: localhost
+
+    - name: Adjustment of rights - otherwise not usable
+      community.docker.docker_container_exec:
+        container: checkmk
+        command: "chown -R {{ CMK_SITE }}:{{ CMK_SITE }} {{ CMK_SITE }}"
+        chdir: /omd/sites
+        user: root
+      delegate_to: localhost

@@ -100,9 +100,12 @@ Changes in the Keycloak admin interface
     ```
 
 ### IoT-Monitoring
-- Monitoring of IoT-Devices via [CheckMK](https://checkmk.com)
+- Monitoring of IoT-Devices via [CheckMK](https://checkmk.com) with notifications via [Rocket.Chat](https://www.rocket.chat/)
 - Monitoring tool for various IoT devices and systems - see documentation [docs.checkmk.com](https://docs.checkmk.com/latest)
-- Individual extensions can be added manually
+- Individual extensions can be added manually, or like the [Rocket.Chat Plugin](https://exchange.checkmk.com/p/rocketchat-notification-1) via Ansible Playbook. A Documentation is avaiable under the [checkmk Docs](https://docs.checkmk.com/latest/en/mkps.html). In the Community Edition, plugins could be installed from the command line (in the Docker Container):
+    - `omd su ${CMK_SITE_ID}`
+    - `mkp add ${path_to_plugin.mkp}`
+    - `mkp enable $ {name_of_plugin}`
 - The following ENVS are required for deploying:
     ```
     CMK_PATH=       # Path where CheckMk stores the monitoring data and configuration.
@@ -112,6 +115,8 @@ Changes in the Keycloak admin interface
     ```
 - Deployment is possible via Docker Compose or [Ansible Playbook](./ansible_service_monitoring/playbook_cmk.yml):
     `./ansible_basic/ansible-playbook.sh -i ./ansible_basic/hosts.ini /${PATH_TO}/ansible_service_monitoring/playbook_cmk.yml`
+
+- Notifications through [Rocket.Chat](https://www.rocket.chat/) must be configured through the GUI. For more information (including other notification methods), see the [Checkmark Docs](https://docs.checkmk.com/latest/en/notifications.html).
 
 ### Platform Monitoring
 - Monitoring the status of the FIWARE platform components in implementation with Docker Swarm
