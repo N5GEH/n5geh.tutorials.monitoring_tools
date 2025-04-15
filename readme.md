@@ -118,6 +118,8 @@ Changes in the Keycloak admin interface
 
 - Notifications through [Rocket.Chat](https://www.rocket.chat/) must be configured through the GUI. For more information (including other notification methods), see the [Checkmark Docs](https://docs.checkmk.com/latest/en/notifications.html).
 
+- The plugin for [Notifications via Matrix] (https://github.com/Hagbear/checkmk-matrix-notify) is deployed via the ansible notebook and needs to be configured via the GUI.
+
 ### Platform Monitoring
 - Monitoring the status of the FIWARE platform components in implementation with Docker Swarm
 - Monitoring by usage of [Prometheus](https://prometheus.io/) with multiple data collectors:
@@ -153,3 +155,6 @@ Changes in the Keycloak admin interface
         - [Grafana Cadvisor exporter](https://grafana.com/grafana/dashboards/14282-cadvisor-exporter/)
         - [Grafana CrateDB Monitoring](https://grafana.com/grafana/dashboards/17174-cratedb-monitoring/)
         - [Grafana Node Exporter Full](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)
+
+### Security scan
+- Information about possible solutions for a [security scan](./security_scan/) are avaiable in this repo.

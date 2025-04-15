@@ -25,6 +25,11 @@ services:
       traefik.http.services.cmk.loadbalancer.server.port: '5000'
     networks:
       - traefik
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
   traefik:

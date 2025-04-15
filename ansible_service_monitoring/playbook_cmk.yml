@@ -81,6 +81,12 @@
         chdir: /omd/sites
         user: root
       delegate_to: localhost
+    
+    - name: Load Checkmk Matrix Notification Plugin
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/Hagbear/checkmk-matrix-notify/main/check_mk_matrix-notify.sh"
+        dest: "{{ CMK_PATH }}/{{ CMK_SITE }}/local/share/check_mk/notifications/"
+        mode: '0755'
 
     - name: Adjustment of rights - otherwise not usable
       community.docker.docker_container_exec:
