@@ -13,6 +13,7 @@
       TRAEFIK_ACME_EAB_KID: '{{ lookup("env", "TRAEFIK_ACME_EAB_KID") }}'
       TRAEFIK_ACME_EAB_HMACENCODED: '{{ lookup("env", "TRAEFIK_ACME_EAB_HMACENCODED") }}'
       TRAEFIK_ACME_EMAIL: '{{ lookup("env", "TRAEFIK_ACME_EMAIL") }}'
+      TRAEFIK_ACME_HTTP_CASERVER: '{{ lookup("env", "TRAEFIK_ACME_HTTP_CASERVER") }}'
     
   tasks:
 

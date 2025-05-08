@@ -5,7 +5,7 @@
 services:
 
   uptime-kuma:
-    image: elestio/uptime-kuma:1.23.15
+    image: louislam/uptime-kuma:1.23.16
     container_name: uptime-kuma
     volumes:
       - ${UPTIME_KUMA_PATH}:/app/data
@@ -15,7 +15,7 @@ services:
       traefik.enable: true
       traefik.http.routers.uptime-kuma.entrypoints: https
       traefik.http.routers.uptime-kuma.tls: true
-      traefik.http.routers.uptime-kuma.tls.certresolver: sectigo
+      traefik.http.routers.uptime-kuma.tls.certresolver: http_resolver
       traefik.http.routers.uptime-kuma.rule: Host(`${UPTIME_KUMA_HOST}`)
       
       traefik.http.routers.uptime-kuma.service: uptime-kuma
@@ -35,7 +35,7 @@ services:
         max-file: "3"
 
   traefik:
-    image: traefik:2.11.13
+    image: traefik:2.11.24
     container_name: traefik
     restart: always
     networks:
@@ -57,7 +57,7 @@ services:
 
   
   oauth:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.7.1
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.9.0
     container_name: oauth
     environment:
       - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
@@ -93,10 +93,11 @@ services:
       traefik.http.middlewares.oauth-signin.errors.status: '401'
       traefik.http.middlewares.oauth-signin.errors.query: /oauth2/sign_in
       traefik.http.routers.oauth.entrypoints: https
-      traefik.http.routers.oauth.tls.certResolver: sectigo
-      traefik.http.routers.oauth.rule: Host(`oauth.${UPTIME_KUMA_HOST?err}`) || PathPrefix(`/oauth2`)
+      traefik.http.routers.oauth.tls.certResolver: http_resolver
+      traefik.http.routers.oauth.rule: Host(`${UPTIME_KUMA_HOST}`) && PathPrefix(`/oauth2`)
       traefik.http.routers.oauth.service: oauth@docker
       traefik.http.services.oauth.loadbalancer.server.port: '4180'
+
     networks:
       - traefik
 
@@ -111,5 +112,6 @@ services:
 networks:
   traefik:
     driver: bridge
+    name: traefik
 
 

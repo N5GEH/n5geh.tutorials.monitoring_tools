@@ -21,10 +21,17 @@ certificatesResolvers:
         hmacEncoded: {{ TRAEFIK_ACME_EAB_HMACENCODED }}
       caServer: https://acme.sectigo.com/v2/OV
       email: {{ TRAEFIK_ACME_EMAIL }}
+  http_resolver:
+    acme:
+      email: {{ TRAEFIK_ACME_EMAIL }}
+      caServer: {{ TRAEFIK_ACME_HTTP_CASERVER }}
+      storage: acme.json
+      httpChallenge:
+        entryPoint: http
 
 
 log:
-  level: INFO
+  level: DEBUG
 
 entryPoints:
   http:

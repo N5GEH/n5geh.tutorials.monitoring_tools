@@ -19,7 +19,7 @@ services:
       traefik.enable: 'true'
       traefik.http.routers.cmk.entrypoints: https
       traefik.http.routers.cmk.tls: 'true'
-      traefik.http.routers.cmk.tls.certResolver: sectigo
+      traefik.http.routers.cmk.tls.certResolver: http_resolver
       traefik.http.routers.cmk.rule: Host(`${CMK_URL}`)
       traefik.http.routers.cmk.service: cmk
       traefik.http.services.cmk.loadbalancer.server.port: '5000'

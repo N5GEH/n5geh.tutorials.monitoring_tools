@@ -97,6 +97,7 @@ Changes in the Keycloak admin interface
     TRAEFIK_ACME_EAB_KID=           # EAB_KID from Sertigo
     TRAEFIK_ACME_EAB_HMACENCODED=   # EAB_HMACENCODED from Sertigo
     TRAEFIK_ACME_EMAIL=             # Email for ACME account
+    TRAEFIK_ACME_HTTP_CASERVER=     # Certresolver if the http_resolver is used
     ```
 
 ### IoT-Monitoring
