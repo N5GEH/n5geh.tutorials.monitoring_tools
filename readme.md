@@ -39,7 +39,7 @@
 
 ### Creating a Client in Keycloak
 
-Changes in the Keycloak admin interface
+Changes in the Keycloak admin interface - for detail information about the requirements of oauth2 see: https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc
 1) Navigate to Clients in the desired realm
 2) Create a new client
     - General Settings
@@ -53,6 +53,10 @@ Changes in the Keycloak admin interface
 3) Adjustment of the scopes necessary
     - Navigate to the created client / Client Scopes
     - Select the created scope `${Client ID}-dedicated`
+    - Add a mapper ("By Configuration"): `Audience` / for Keycloak OIDC needed
+        - Name = `aud-mapper-<your client's id>`
+        - Included Client Audience = `<your client's id>`
+        - Add to ID token and dd to access toke = `ON`
     - Add a mapper ("By Configuration")
         - ![Mapper Group Membership](./keycloak_connection/oauth_client_scropes_groups.png)
 4) Create the desired group and add the relevant people
@@ -87,10 +91,13 @@ Changes in the Keycloak admin interface
     OAUTH_PROVIDER_URL=             # Keycloak URL from Keycloak
     OAUTH2_PROXY_CLIENT_ID=         # Client ID from Keycloak
     OAUTH2_PROXY_CLIENT_SECRET=     # Client Secret from Keycloak
+    OAUTH2_PROXY_COOKIE_NAME=       # Name for the cookies
     OAUTH2_PROXY_COOKIE_SECRET=     # Self-chosen cookie secret (seed string for secure cookies (optionally base64 encoded))
     OAUTH2_PROXY_ALLOWED_GROUP=     # Allowed groups from Keycloak
     OAUTH2_PROXY_BASIC_DOMAIN=      # Parent domain of UPTIME_KUMA_HOST
-    OAUTH2_PROXY_FOOTER=            # Option to add a footer
+    OAUTH2_PROXY_FOOTER=            # Option to add a footer (optional)
+    OAUTH2_TEMPLATES_PATH=          # Path for the templates to adjust the login flow (automatic redirect to the Provider)
+    OAUTH2_PROVIDER_DISPLAY_NAME=   # Name of the Lofin povider (optional - only a text on the button, if there is no automatic redirect)
 
     # TRAEFIK
     TRAEFIK_PATH=                   # Path to the files of Traefik

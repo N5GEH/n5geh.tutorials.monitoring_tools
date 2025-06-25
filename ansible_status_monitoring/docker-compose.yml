@@ -1,6 +1,7 @@
 # https://github.com/tlex/traefik-oauth2-proxy/blob/master/docker-compose.yml
 # https://medium.com/@justinking_2311/securing-your-services-with-oauth2-proxy-and-traefik-a-docker-compose-guide-8a4c3ad57cb2
 # https://joeeey.com/blog/selfhosting-sso-with-traefik-oauth2-proxy-part-2/
+# https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc
 
 services:
 
@@ -55,43 +56,57 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  
+  # https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc
   oauth:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.9.0
     container_name: oauth
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.9.0
+    restart: unless-stopped
     environment:
       - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4180
-      - OAUTH2_PROXY_PROVIDER=keycloak
-      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME=Keycloak
-      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_PROVIDER_DISPLAY_NAME=${OAUTH2_PROVIDER_DISPLAY_NAME}
       - OAUTH2_PROXY_SCOPE=openid profile email
+      - OAUTH2_PROXY_REVERSE_PROXY=true
+
+      # keycloak oidc
+      - OAUTH2_PROXY_PROVIDER=keycloak-oidc
       - OAUTH2_PROXY_CLIENT_ID=${OAUTH2_PROXY_CLIENT_ID}
       - OAUTH2_PROXY_CLIENT_SECRET=${OAUTH2_PROXY_CLIENT_SECRET}
+      - OAUTH2_PROXY_REDIRECT_URL=https://${UPTIME_KUMA_HOST}/oauth2/callback
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=${OAUTH_PROVIDER_URL}
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_ALLOWED_GROUPS=${OAUTH2_PROXY_ALLOWED_GROUP}
+
+      # cookie settings
+      - OAUTH2_PROXY_COOKIE_NAME=${OAUTH2_PROXY_COOKIE_NAME}
       - OAUTH2_PROXY_COOKIE_SECURE=true
       - OAUTH2_PROXY_COOKIE_SECRET=${OAUTH2_PROXY_COOKIE_SECRET}
-      - OAUTH2_PROXY_LOGIN_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/auth
-      - OAUTH2_PROXY_OIDC_ISSUER_URL=${OAUTH_PROVIDER_URL}
-      - OAUTH2_PROXY_PROFILE_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/userinfo
-      - OAUTH2_PROXY_REDEEM_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/token
-      - OAUTH2_PROXY_VALIDATE_URL=${OAUTH_PROVIDER_URL}/protocol/openid-connect/userinfo
+
+      # === Session Store (Redis) ===
+      - OAUTH2_PROXY_SESSION_STORE_TYPE=redis
+      - OAUTH2_PROXY_REDIS_CONNECTION_URL=redis://redis:6379
+
+      # Template for Authentication with automatic redirect to SSO
+      - OAUTH2_PROXY_CUSTOM_TEMPLATES_DIR=/mnt/templates
       - OAUTH2_PROXY_FOOTER=${OAUTH2_PROXY_FOOTER}
-      - OAUTH2_PROXY_PASS_BASIC_AUTH=false
-      - OAUTH2_PROXY_PASS_USER_HEADERS=true
-      - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
-      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
-      - OAUTH2_PROXY_ALLOWED_GROUPS=${OAUTH2_PROXY_ALLOWED_GROUP}
-      - OAUTH2_PROXY_REVERSE_PROXY=true
-      - OAUTH2_PROXY_COOKIE_DOMAIN=.${OAUTH2_PROXY_BASIC_DOMAIN}
-      - OAUTH2_PROXY_WHITELIST_DOMAIN=*.{OAUTH2_PROXY_BASIC_DOMAIN}
+    
+    volumes:
+      - ${OAUTH2_TEMPLATES_PATH}:/mnt/templates:ro
+
+
+    depends_on:
+      - redis
 
     labels:
       traefik.enable: 'true'
-      traefik.http.middlewares.oauth-verify.forwardAuth.address: http://oauth:4180/oauth2/auth?allowed_groups=${OAUTH2_PROXY_ALLOWED_GROUP}
+      # Middlewares for OAuth2 Proxy
+      traefik.http.middlewares.oauth-verify.forwardAuth.address: http://oauth:4180/oauth2/auth
       traefik.http.middlewares.oauth-verify.forwardAuth.trustForwardHeader: 'true'
       traefik.http.middlewares.oauth-verify.forwardAuth.authResponseHeaders: X-Auth-Request-User,X-Auth-Request-Email,Authorization,Set-Cookie
+
       traefik.http.middlewares.oauth-signin.errors.service: oauth@docker
       traefik.http.middlewares.oauth-signin.errors.status: '401'
       traefik.http.middlewares.oauth-signin.errors.query: /oauth2/sign_in
+
       traefik.http.routers.oauth.entrypoints: https
       traefik.http.routers.oauth.tls.certResolver: http_resolver
       traefik.http.routers.oauth.rule: Host(`${UPTIME_KUMA_HOST}`) && PathPrefix(`/oauth2`)
@@ -101,17 +116,22 @@ services:
     networks:
       - traefik
 
-    restart: always
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
+  redis:
+    image: redis:6
+    restart: unless-stopped
+
+    networks:
+      - traefik
+
 
 networks:
   traefik:
     driver: bridge
     name: traefik
-
 

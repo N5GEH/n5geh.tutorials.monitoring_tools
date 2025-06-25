@@ -1,0 +1,1 @@
+Adjust the login flow to an automatic redirect.

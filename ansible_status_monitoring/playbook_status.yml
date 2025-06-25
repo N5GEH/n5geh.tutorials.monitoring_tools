@@ -14,6 +14,7 @@
       TRAEFIK_ACME_EAB_HMACENCODED: '{{ lookup("env", "TRAEFIK_ACME_EAB_HMACENCODED") }}'
       TRAEFIK_ACME_EMAIL: '{{ lookup("env", "TRAEFIK_ACME_EMAIL") }}'
       TRAEFIK_ACME_HTTP_CASERVER: '{{ lookup("env", "TRAEFIK_ACME_HTTP_CASERVER") }}'
+      OAUTH2_TEMPLATES_PATH: '{{ lookup("env", "OAUTH2_TEMPLATES_PATH") }}'
     
   tasks:
 
@@ -39,6 +40,19 @@
       template:
         src: traefik.yml
         dest: "{{ TRAEFIK_PATH }}/traefik.yml"
+
+    - name: Create directory for OAUTH_2
+      file:
+        path: "{{ OAUTH2_TEMPLATES_PATH }}"
+        state: directory
+        mode: '0755'
+    
+    - name: Copy OAUTH2 templates
+      copy:
+        src: oauth2_templates/
+        dest: "{{ OAUTH2_TEMPLATES_PATH }}"
+        mode: '0644'
+  
     
     - name: Deploy Docker Compose
       # https://docs.ansible.com/ansible/latest/collections/community/docker/docker_compose_v2_module.html#ansible-collections-community-docker-docker-compose-v2-module
