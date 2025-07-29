@@ -5,7 +5,9 @@ run_ansible_trivy_scan:
   script:
     - echo "$HOSTS_INI_CONTENT" > hosts.ini
     - ansible-playbook -i hosts.ini ./security_scan/playbook_trivy.yml
-  when: manual
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - when: manual
   allow_failure: false
 
   artifacts:

@@ -1,7 +1,7 @@
 
 
 - name: Install & Run Scanner Trivy
-  hosts: localhost
+  hosts: trivy
   become: true
 
   pre_tasks:
