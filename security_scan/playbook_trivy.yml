@@ -18,11 +18,17 @@
       file:
         path: '{{ TRIVY_CACHE_DIR }}'
         state: directory
+        mode: '0755'
+        owner: gitlab-runner
+        group: gitlab-runner
   
     - name: Create Trivy Result Directory
       file:
         path: '{{ TRIVY_REPORT_DIR }}'
         state: directory
+        mode: '0755'
+        owner: gitlab-runner
+        group: gitlab-runner
 
     - name: Get Docker Images
       shell: docker images --format '{{ "{{.Repository}}:{{.Tag}}" }}'
