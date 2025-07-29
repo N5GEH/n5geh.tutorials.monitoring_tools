@@ -10,5 +10,5 @@ run_ansible_trivy_scan:
 
   artifacts:
     paths:
-      - trivy/results
+      - security_scan/trivy/results
     expire_in: 1 week

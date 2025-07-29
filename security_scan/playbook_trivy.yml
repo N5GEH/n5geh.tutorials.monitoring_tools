@@ -1,5 +1,4 @@
 
-# https://docs.docker.com/engine/install/ubuntu/
 
 - name: Install & Run Scanner Trivy
   hosts: localhost
@@ -9,9 +8,8 @@
   - name: Loading environment variables
     tags: always
     set_fact:
-      TRIVY_CACHE_DIR: '{{ lookup("env", "TRIVY_CACHE_DIR") }}'
-      TRIVY_REPORT_DIR: '{{ lookup("env", "TRIVY_REPORT_DIR") }}'
-      TRIVY_TEMPLATE_DIR: '{{ lookup("env", "TRIVY_TEMPLATE_DIR") }}'
+      TRIVY_CACHE_DIR: '{{ lookup("env", "TRIVY_CACHE_DIR") | default("./trivy/cache") }}'
+      TRIVY_REPORT_DIR: ./trivy/results
   
   tasks:
     - name: Create Trivy Cache Directory
@@ -57,7 +55,7 @@
           - /var/run/docker.sock:/var/run/docker.sock:ro
           - '{{ TRIVY_CACHE_DIR }}:/root/.cache/'
           - '{{ TRIVY_REPORT_DIR }}:/report'
-          - '{{ TRIVY_TEMPLATE_DIR }}:/templates/results_template.tpl'
+          - './results_template.html:/templates/results_template.tpl'
         detach: false
       loop: "{{ docker_images.stdout_lines }}"
       loop_control:
