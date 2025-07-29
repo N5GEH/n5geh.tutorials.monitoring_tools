@@ -60,3 +60,11 @@
       loop: "{{ docker_images.stdout_lines }}"
       loop_control:
         label: "{{ item }}"
+
+    - name: Set permissions to gitlab-runner for trivy directories
+      file:
+        path: security_scan/trivy
+        mode: '0755'
+        recurse: yes
+        owner: gitlab-runner
+        group: gitlab-runner
