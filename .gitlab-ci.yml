@@ -7,3 +7,8 @@ run_ansible_trivy_scan:
     - ansible-playbook -i hosts.ini ./security_scan/playbook_trivy.yml
   when: manual
   allow_failure: false
+
+  artifacts:
+    paths:
+      - trivy/results
+    expire_in: 1 week

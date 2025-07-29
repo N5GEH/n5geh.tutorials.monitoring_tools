@@ -18,17 +18,11 @@
       file:
         path: '{{ TRIVY_CACHE_DIR }}'
         state: directory
-        mode: '0755'
-        owner: root
-        group: root
   
     - name: Create Trivy Result Directory
       file:
         path: '{{ TRIVY_REPORT_DIR }}'
         state: directory
-        mode: '0755'
-        owner: root
-        group: root
 
     - name: Get Docker Images
       shell: docker images --format '{{ "{{.Repository}}:{{.Tag}}" }}'
