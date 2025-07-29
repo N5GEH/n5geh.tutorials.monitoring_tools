@@ -8,7 +8,8 @@
   - name: Loading environment variables
     tags: always
     set_fact:
-      TRIVY_CACHE_DIR: '{{ lookup("env", "TRIVY_CACHE_DIR") | default("./trivy/cache") }}'
+      TRIVY_CACHE_DIR: >-
+        {{ (lookup('env', 'TRIVY_CACHE_DIR') | length > 0) | ternary(lookup('env', 'TRIVY_CACHE_DIR'), './trivy/cache') }}
       TRIVY_REPORT_DIR: ./trivy/results
   
   tasks:
@@ -63,8 +64,9 @@
 
     - name: Set permissions to gitlab-runner for trivy directories
       file:
-        path: security_scan/trivy
+        path: ./trivy
         mode: '0755'
         recurse: yes
         owner: gitlab-runner
         group: gitlab-runner
+
