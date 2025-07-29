@@ -1,0 +1,64 @@
+
+# https://docs.docker.com/engine/install/ubuntu/
+
+- name: Install & Run Scanner Trivy
+  hosts: localhost
+  become: true
+
+  pre_tasks:
+  - name: Loading environment variables
+    tags: always
+    set_fact:
+      TRIVY_CACHE_DIR: '{{ lookup("env", "TRIVY_CACHE_DIR") }}'
+      TRIVY_REPORT_DIR: '{{ lookup("env", "TRIVY_REPORT_DIR") }}'
+      TRIVY_TEMPLATE_DIR: '{{ lookup("env", "TRIVY_TEMPLATE_DIR") }}'
+  
+  tasks:
+    - name: Create Trivy Cache Directory
+      file:
+        path: '{{ TRIVY_CACHE_DIR }}'
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+  
+    - name: Create Trivy Result Directory
+      file:
+        path: '{{ TRIVY_REPORT_DIR }}'
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    - name: Get Docker Images
+      shell: docker images --format '{{ "{{.Repository}}:{{.Tag}}" }}'
+      register: docker_images
+
+    - name: Filter Docker Images
+      set_fact:
+        image_list: "{{ docker_images.stdout_lines | select('match', '.+:.+') | list }}"
+
+    - name: Print Docker Images
+      debug:
+        var: image_list
+
+
+    - name: Scan Docker-Image with Trivy
+      community.docker.docker_container:
+        name: "trivy_scan_{{ item | regex_replace('[^a-zA-Z0-9]', '_') }}"
+        image: aquasec/trivy
+        command: >
+          image {{ item }}
+          --format template
+          --template "@/templates/results_template.tpl"
+          --output /report/{{ item | regex_replace('[^a-zA-Z0-9]', '_') }}.html
+
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - '{{ TRIVY_CACHE_DIR }}:/root/.cache/'
+          - '{{ TRIVY_REPORT_DIR }}:/report'
+          - '{{ TRIVY_TEMPLATE_DIR }}:/templates/results_template.tpl'
+        detach: false
+      loop: "{{ docker_images.stdout_lines }}"
+      loop_control:
+        label: "{{ item }}"

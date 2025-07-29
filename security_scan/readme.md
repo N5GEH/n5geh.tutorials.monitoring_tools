@@ -10,4 +10,5 @@
             - https://trivy.dev/v0.18.3/installation/
         - Alle Images scannen:
             - `docker ps -q | xargs -I {} sh -c "trivy image \$(docker inspect --format='{{index .Config.Image}}' {})"`
-    - Prüfen / TODO
+- Nutzung mit Ansible Playbook (Ausführung über CI-Tool möglich)
+    - 

@@ -1,14 +1,16 @@
 # Monitoring
 
 ## Overview
-- General Notes
-    - Ansible
-    - Docker (Installation with Ansible)
-    - Keycloak
+This repository contains information on potential monitoring solutions for the N5GEH platform. These are just suggestions for specific solutions for different use cases. The repository contains sections on:
+- [General Notes](#general-notes)
+    - [Usage of Ansible](#using-ansible)
+    - [Install Docker with Ansible](#docker)
+    - [Crating a Keycloak-Client](#creating-a-client-in-keycloak)
 - Documentation of the Monitoring Systems
-    - Status Monitoring
-    - IoT Monitoring
-    - Platform Monitoring
+    - [Status Monitoring](#status-monitoring)
+    - [IoT Monitoring](#iot-monitoring)
+    - [Platform Monitoring](#platform-monitoring)
+    - [Security Scan](#security-scan)
 
 ## General Notes
 ### Using Ansible
