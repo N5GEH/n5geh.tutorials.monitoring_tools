@@ -1,0 +1,16 @@
+run_ansible_trivy_scan:
+  stage: deploy
+  tags:
+    - gitlab-docker-scan
+  script:
+    - echo "$HOSTS_INI_CONTENT" > hosts.ini
+    - ansible-playbook -i hosts.ini ./security_scan/playbook_trivy.yml
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - when: manual
+  allow_failure: false
+
+  artifacts:
+    paths:
+      - security_scan/trivy/results
+    expire_in: 1 week
