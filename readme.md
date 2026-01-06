@@ -5,7 +5,7 @@ This repository contains information on potential monitoring solutions for the N
 - [General Notes](#general-notes)
     - [Usage of Ansible](#using-ansible)
     - [Install Docker with Ansible](#docker)
-    - [Crating a Keycloak-Client](#creating-a-client-in-keycloak)
+    - [Creating a Keycloak-Client](#creating-a-client-in-keycloak)
 - Documentation of the Monitoring Systems
     - [Status Monitoring](#status-monitoring)
     - [IoT Monitoring](#iot-monitoring)
