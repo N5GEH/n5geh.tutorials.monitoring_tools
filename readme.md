@@ -1,7 +1,7 @@
 # Monitoring Tutorial
 
 ## Overview
-This repository contains information on potential monitoring solutions for the N5GEH platform. These are just suggestions for specific solutions for different use cases. The repository contains sections on:
+This repository contains information on potential monitoring solutions for the N5GEH platform. These are **just suggestions** for specific solutions for different use cases. The repository contains sections on:
 - [General Notes](#general-notes)
     - [Usage of Ansible](#using-ansible)
     - [Install Docker with Ansible](#docker)
@@ -12,7 +12,7 @@ This repository contains information on potential monitoring solutions for the N
     - [Platform Monitoring](#platform-monitoring)
     - [Security Scan](#security-scan)
 
-The objectives and possibilities of the individual sub-areas are presented in the following overview. There is some overlap, as the various approaches are partly redundant.
+The objectives and possibilities of the individual sub-areas are presented in the following overview. **There is some overlap, as the various approaches are partly redundant**.
 
 <img src="./doc/monitoring_tools_overview.png" alt="Monitoring Tools Overview" width="600" />
 
@@ -173,5 +173,5 @@ We gratefully acknowledge the financial support of the Federal Ministry <br />
 for Federal Ministry for Economic Affairs and Energy, promotional reference 
 03EN1030A.
 
-<a href="https://www.bundeswirtschaftsministerium.de/Navigation/EN/Home/home.html"> <img alt="BMWK" 
+<a href="https://www.bundeswirtschaftsministerium.de/Navigation/EN/Home/home.html"> <img alt="BMWE" 
 src="https://raw.githubusercontent.com/gewv-tu-dresden/encodapy/main/docs/source/logos/BMWE_gefoerdert_en_RGB.svg" height="150"> </a>
