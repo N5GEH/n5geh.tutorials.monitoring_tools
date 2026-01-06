@@ -1,4 +1,4 @@
-# Monitoring
+# Monitoring Tutorial
 
 ## Overview
 This repository contains information on potential monitoring solutions for the N5GEH platform. These are just suggestions for specific solutions for different use cases. The repository contains sections on:
@@ -11,6 +11,10 @@ This repository contains information on potential monitoring solutions for the N
     - [IoT Monitoring](#iot-monitoring)
     - [Platform Monitoring](#platform-monitoring)
     - [Security Scan](#security-scan)
+
+The objectives and possibilities of the individual sub-areas are presented in the following overview. There is some overlap, as the various approaches are partly redundant.
+
+<img src="./doc/monitoring_tools_overview.png" alt="Monitoring Tools Overview" width="600" />
 
 ## General Notes
 ### Using Ansible
@@ -40,30 +44,7 @@ This repository contains information on potential monitoring solutions for the N
 - Using an [Ansible Playbook](./ansible_docker/playbook_docker.yml) to install Docker is possible
 
 ### Creating a Client in Keycloak
-
-Changes in the Keycloak admin interface - for detail information about the requirements of oauth2 see: https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/keycloak_oidc
-1) Navigate to Clients in the desired realm
-2) Create a new client
-    - General Settings
-        - `Client type`: OpenID Connect
-        - Set `Client ID` uniquely
-        - `Name` and `Description` optional
-    - Capability Config
-        - ![Capability Config Setup](./keycloak_connection/oauth_client_capability_config.png)
-    - Login Settings
-        - `Valid redirect URIs` corresponds to the URL of the desired service
-3) Adjustment of the scopes necessary
-    - Navigate to the created client / Client Scopes
-    - Select the created scope `${Client ID}-dedicated`
-    - Add a mapper ("By Configuration"): `Audience` / for Keycloak OIDC needed
-        - Name = `aud-mapper-<your client's id>`
-        - Included Client Audience = `<your client's id>`
-        - Add to ID token and dd to access toke = `ON`
-    - Add a mapper ("By Configuration")
-        - ![Mapper Group Membership](./keycloak_connection/oauth_client_scropes_groups.png)
-4) Create the desired group and add the relevant people
-5) Transfer the access data to [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy) from the client config
-    - ![Client Credentials](./keycloak_connection/oauth_client_credentials.png)
+In order to use this setup with Keycloak, you will need to set up a client in Keycloak. See the tutorial for this [Keycloak connection](./keycloak_connection/readme.md) for more information.
 
 ## Documentation of the Monitoring Systems
 ### Status Monitoring
@@ -73,6 +54,9 @@ Changes in the Keycloak admin interface - for detail information about the requi
     - to visualize the system status
     - to notify in case of service failures
 
+- You can adjust the language and add your own components. The tool gives you a status page, like this: <br>
+    <img src="./doc/n5geh_status.png" alt="N5GEH Status" width="500" />
+- It is also possible to use Uptime-Kuma in a simple Docker Compose setup. See the project's documentation for details. 
 - Securing via [oauth2-proxy](https://github.com/oauth2-proxy/oauth2-proxy), so that a login via Keycloak is required.
     - Setting up the connection to Keycloak is necessary
     - Use of a defined group for release is required
@@ -110,8 +94,12 @@ Changes in the Keycloak admin interface - for detail information about the requi
     ```
 
 ### IoT-Monitoring
-- Monitoring of IoT-Devices via [CheckMK](https://checkmk.com) with notifications via [Rocket.Chat](https://www.rocket.chat/)
+- Monitoring of IoT-Devices via [Checkmk](https://checkmk.com) with notifications via [Rocket.Chat](https://www.rocket.chat/) or [Matrix](https://matrix.org)
+- The tool provides an overview of hardware and software details such as memory usage and load. The first overview shows whether all the checks are OK or if there are any problems. This image shows an example. <br>
+    <img src="./doc/Dashboard_CheckMK.png" alt="Dashboard_CheckMK" width="500" />
 - Monitoring tool for various IoT devices and systems - see documentation [docs.checkmk.com](https://docs.checkmk.com/latest)
+    - You need to add the devices yourself. See the official documentation for this.
+    - The ways in which you can add devices depend on the licence type you use.
 - Individual extensions can be added manually, or like the [Rocket.Chat Plugin](https://exchange.checkmk.com/p/rocketchat-notification-1) via Ansible Playbook. A Documentation is avaiable under the [checkmk Docs](https://docs.checkmk.com/latest/en/mkps.html). In the Community Edition, plugins could be installed from the command line (in the Docker Container):
     - `omd su ${CMK_SITE_ID}`
     - `mkp add ${path_to_plugin.mkp}`
@@ -128,10 +116,11 @@ Changes in the Keycloak admin interface - for detail information about the requi
 
 - Notifications through [Rocket.Chat](https://www.rocket.chat/) must be configured through the GUI. For more information (including other notification methods), see the [Checkmark Docs](https://docs.checkmk.com/latest/en/notifications.html).
 
-- The plugin for [Notifications via Matrix] (https://github.com/Hagbear/checkmk-matrix-notify) is deployed via the ansible notebook and needs to be configured via the GUI.
+- The plugin for [Notifications via Matrix](https://github.com/Hagbear/checkmk-matrix-notify) is deployed via the ansible notebook and needs to be configured via the GUI.
 
 ### Platform Monitoring
 - Monitoring the status of the FIWARE platform components in implementation with Docker Swarm
+    - It can also be used to collect data from IoT devices, but implementation is not as straightforward as it is shown above.
 - Monitoring by usage of [Prometheus](https://prometheus.io/) with multiple data collectors:
     - [cAdvisor](https://github.com/google/cadvisor):
         - Container Advisor provides information about the resource usage of the running containers.
@@ -159,7 +148,7 @@ Changes in the Keycloak admin interface - for detail information about the requi
         - For more Information see [doc](https://github.com/portainer/templates/blob/master/images/monitoring/prometheus/config/prometheus.yml)
     - The monitoring data of prometheus should be stored in a volume to keep them outside of the container itself
 - Grafana visualisation
-    - Grafana could visualize the data from prometheus
+    - Grafana could visualize the data from prometheus, like
     - Prometheus could be added as datasource - see [prometheus doc](https://prometheus.io/docs/visualization/grafana/)
     - A lot of dashboard templates could be used, like:
         - [Grafana Cadvisor exporter](https://grafana.com/grafana/dashboards/14282-cadvisor-exporter/)
@@ -167,4 +156,22 @@ Changes in the Keycloak admin interface - for detail information about the requi
         - [Grafana Node Exporter Full](https://grafana.com/grafana/dashboards/1860-node-exporter-full/)
 
 ### Security scan
-- Information about possible solutions for a [security scan](./security_scan/) are avaiable in this repo.
+- Information about possible solutions for a [security scan](./security_scan/readme.md) are avaiable in this repo.
+
+## License
+
+This tutorial is licensed under the MIT License [MIT License](LICENSE).
+
+## Further project information
+
+<a href="https://n5geh.de/"> <img alt="National 5G Energy Hub" 
+src="https://raw.githubusercontent.com/N5GEH/n5geh.platform/master/docs/logos/n5geh-logo.png" height="100"></a>
+
+## Acknowledgments
+
+We gratefully acknowledge the financial support of the Federal Ministry <br /> 
+for Federal Ministry for Economic Affairs and Energy, promotional reference 
+03EN1030A.
+
+<a href="https://www.bundeswirtschaftsministerium.de/Navigation/EN/Home/home.html"> <img alt="BMWK" 
+src="https://raw.githubusercontent.com/gewv-tu-dresden/encodapy/main/docs/source/logos/BMWE_gefoerdert_en_RGB.svg" height="150"> </a>
